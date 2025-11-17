@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "rabbitmq-orchestrator": {
+      "command": "node",
+      "args": ["scripts/mcp-server.js"],
+      "env": {
+        "RABBITMQ_URL": "amqp://localhost:5672"
+      }
+    }
+  }
+}
