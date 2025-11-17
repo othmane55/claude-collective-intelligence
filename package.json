@@ -7,18 +7,43 @@
   "scripts": {
     "start": "node scripts/orchestrator.js",
     "monitor": "node scripts/monitor.js",
-    "test": "node scripts/test-orchestration.js",
-    "setup": "node scripts/setup-rabbitmq.js"
+    "setup": "node scripts/setup-rabbitmq.js",
+    "test": "npm run test:unit && npm run test:integration && npm run test:e2e",
+    "test:unit": "NODE_OPTIONS=--experimental-vm-modules jest tests/unit --coverage",
+    "test:integration": "node tests/integration/run-all.js",
+    "test:integration:task-distribution": "node tests/integration/task-distribution.test.js",
+    "test:integration:brainstorming": "node tests/integration/brainstorming.test.js",
+    "test:integration:failure-handling": "node tests/integration/failure-handling.test.js",
+    "test:integration:multi-agent": "node tests/integration/multi-agent.test.js",
+    "test:integration:monitoring": "node tests/integration/monitoring.test.js",
+    "test:e2e": "node tests/e2e/run-all.js",
+    "test:e2e:quick": "node tests/e2e/run-all.js --quick",
+    "test:e2e:perf": "node tests/e2e/run-all.js --perf",
+    "test:e2e:verbose": "node tests/e2e/run-all.js --verbose",
+    "test:e2e:5-terminal": "node tests/e2e/5-terminal-scenario.test.js",
+    "test:e2e:worktree": "node tests/e2e/git-worktree.test.js",
+    "test:e2e:failure": "node tests/e2e/failure-recovery.test.js",
+    "test:e2e:scaling": "node tests/e2e/scaling.test.js",
+    "test:e2e:performance": "node tests/e2e/performance.test.js",
+    "test:watch": "NODE_OPTIONS=--experimental-vm-modules jest --watch",
+    "test:coverage": "NODE_OPTIONS=--experimental-vm-modules jest --coverage --coverageReporters=text-lcov",
+    "test:ci": "NODE_OPTIONS=--experimental-vm-modules jest --ci --coverage --maxWorkers=2",
+    "test:debug": "node --experimental-vm-modules --inspect-brk node_modules/.bin/jest --runInBand"
   },
   "dependencies": {
     "amqplib": "^0.10.3",
-    "uuid": "^9.0.1",
-    "dotenv": "^16.3.1",
     "chalk": "^5.3.0",
-    "ora": "^7.0.1"
+    "dotenv": "^16.3.1",
+    "ora": "^7.0.1",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
-    "@types/node": "^20.10.0"
+    "@jest/globals": "^29.7.0",
+    "@types/node": "^20.10.0",
+    "jest": "^29.7.0",
+    "jest-environment-node": "^29.7.0",
+    "jest-junit": "^16.0.0",
+    "jest-mock": "^29.7.0"
   },
   "engines": {
     "node": ">=18.0.0"
