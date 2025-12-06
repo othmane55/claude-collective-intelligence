@@ -556,7 +556,7 @@ This is an ultra-powerful orchestration system! Contributions welcome:
 MIT License - Copyright (c) 2025 Muhsin Elcicek & Dr. Umit Kacar
 
 **Authors:**
-- **Muhsin Elcicek** - Software Architect
+- **Muhsin Elcicek** - Senior Software Architect
 - **Dr. Umit Kacar** - Senior AI Researcher & Engineer
 
 See [LICENSE](LICENSE) file for details.
