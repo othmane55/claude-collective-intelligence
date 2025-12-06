@@ -1,7 +1,7 @@
 {
-  "name": "ai-agent-orchestrator-rabbitmq",
+  "name": "claude-swarm",
   "version": "1.0.0",
-  "description": "Ultra-advanced multi-agent orchestration system using RabbitMQ",
+  "description": "Multi-Agent Orchestration for Claude Code - Transform isolated sessions into collaborative AI teams via RabbitMQ",
   "main": "scripts/orchestrator.js",
   "type": "module",
   "scripts": {

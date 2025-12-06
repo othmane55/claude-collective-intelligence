@@ -1,8 +1,10 @@
-# 🚀 AI Agent Orchestrator - RabbitMQ Plugin for Claude Code
+# 🐝 claude-swarm
 
-**Ultra-advanced multi-agent orchestration system** that enables distributed Claude Code instances to communicate, collaborate, and coordinate work through RabbitMQ message queues.
+### Multi-Agent Orchestration for Claude Code
 
-Transform multiple independent Claude Code sessions into a **collaborative AI team** with real-time communication, task distribution, brainstorming, and result aggregation!
+**Transform isolated Claude Code sessions into collaborative AI teams** via RabbitMQ message queues. Real-time communication, task distribution, brainstorming, and democratic voting - all powered by distributed agent architecture.
+
+> *"Swarm Intelligence: When multiple Claude instances work together, the whole becomes greater than the sum of its parts."*
 
 [![License: Proprietary](https://img.shields.io/badge/License-Proprietary-red.svg)](LICENSE)
 [![Node.js Version](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen)](https://nodejs.org/)
