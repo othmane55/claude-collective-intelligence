@@ -510,6 +510,47 @@ async function aggregateWithErrorHandling(taskIds) {
 5. **Progressive Updates**: Show results as they arrive
 6. **Error Handling**: Account for failed tasks
 7. **Weighted Aggregation**: Consider confidence/expertise
+8. **Single Consumer Pattern**: Only ONE consumer type per queue (see below)
+
+---
+
+## Critical Architecture Warning
+
+**Result Queue Consumer Conflict (December 7, 2025)**
+
+The `agent.results` queue should have a SINGLE consumer pattern:
+
+```
+PROBLEM: Multiple consumer types on same queue
++-------------------+
+| agent.results     |
++-------------------+
+    /           \
+   v             v
+Leader         Worker
+(task results) (brainstorm)
+
+CONFLICT! Messages go to random consumer!
+```
+
+**Solution Pattern:**
+```
+CORRECT: Separate queues for separate purposes
++-------------------+     +---------------------------+
+| agent.results     |     | agent.brainstorm.results  |
++-------------------+     +---------------------------+
+         |                           |
+         v                           v
+      Leader                      Workers
+   (task results)            (brainstorm responses)
+```
+
+**Before aggregating results, verify:**
+- [ ] Only intended consumers listen to the queue
+- [ ] No competing consumers for same message type
+- [ ] Message routing is deterministic
+
+See: `docs/lessons/LESSONS_LEARNED.md` for full analysis
 
 ## Examples
 

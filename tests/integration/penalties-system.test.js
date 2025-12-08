@@ -4,7 +4,7 @@
  * Tests complete workflows: penalty application, appeals, retraining, and recovery
  */
 
-import { PenaltySystem } from '../../scripts/penalties-system.js';
+import { PenaltySystem } from '../../src/systems/penalties/system.js';
 import { PerformanceEvaluator } from '../../scripts/penalties/performance-evaluator.js';
 import { RetrainingManager } from '../../scripts/penalties/retraining-manager.js';
 

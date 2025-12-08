@@ -8,8 +8,8 @@
  * - Alert generation
  */
 
-import AgentOrchestrator from '../../scripts/orchestrator.js';
-import MonitorDashboard from '../../scripts/monitor.js';
+import AgentOrchestrator from '../../src/core/orchestrator.js';
+import MonitorDashboard from '../../src/core/monitor.js';
 import TestSetup, { waitForCondition, wait, assert, assertEqual } from './setup.js';
 
 class MonitoringTest {

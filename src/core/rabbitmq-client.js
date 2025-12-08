@@ -21,7 +21,8 @@ export class RabbitMQClient extends EventEmitter {
 
     this.connection = null;
     this.channel = null;
-    this.agentId = process.env.AGENT_ID || `agent-${uuidv4()}`;
+    // 100K GEM FIX: Use agentId from config first (passed by Orchestrator), then env, then generate
+    this.agentId = config.agentId || process.env.AGENT_ID || `agent-${uuidv4()}`;
     this.isConnected = false;
     this.reconnectAttempts = 0;
     this.maxReconnectAttempts = 10;
@@ -148,6 +149,25 @@ export class RabbitMQClient extends EventEmitter {
   }
 
   /**
+   * Setup brainstorm result queue (EXCLUSIVE per agent - 100K GEM Solution!)
+   * Creates dedicated queue for this agent to receive brainstorm responses
+   * Eliminates round-robin competition between Leader and Workers
+   */
+  async setupBrainstormResultQueue() {
+    // EXCLUSIVE QUEUE: Each agent gets own queue (no round-robin!)
+    const queueName = `brainstorm.results.${this.agentId}`;
+
+    await this.channel.assertQueue(queueName, {
+      exclusive: true,      // Only this agent can consume from this queue
+      autoDelete: true,     // Queue deleted when agent disconnects
+      durable: false        // No persistence needed for exclusive queues
+    });
+
+    console.log(`🧠 Brainstorm result queue ready (EXCLUSIVE): ${queueName}`);
+    return queueName;
+  }
+
+  /**
    * Setup status exchange (topic for selective broadcasting)
    */
   async setupStatusExchange(exchangeName = 'agent.status') {
@@ -213,13 +233,15 @@ export class RabbitMQClient extends EventEmitter {
   }
 
   /**
-   * Broadcast brainstorm message
+   * Broadcast brainstorm message (100K GEM Solution - includes replyTo!)
+   * Workers will send responses to the initiator's exclusive queue
    */
   async broadcastBrainstorm(message, exchangeName = 'agent.brainstorm') {
     const msg = {
       id: uuidv4(),
       type: 'brainstorm',
       from: this.agentId,
+      replyTo: `brainstorm.results.${this.agentId}`,  // NEW: Tell workers where to respond!
       timestamp: Date.now(),
       message
     };
@@ -230,11 +252,12 @@ export class RabbitMQClient extends EventEmitter {
       Buffer.from(JSON.stringify(msg)),
       {
         contentType: 'application/json',
-        messageId: msg.id
+        messageId: msg.id,
+        replyTo: msg.replyTo  // AMQP standard field
       }
     );
 
-    console.log(`🧠 Broadcasted brainstorm: ${msg.id}`);
+    console.log(`🧠 Broadcasted brainstorm (replyTo: ${msg.replyTo}): ${msg.id}`);
     return msg.id;
   }
 
@@ -267,9 +290,12 @@ export class RabbitMQClient extends EventEmitter {
   }
 
   /**
-   * Publish result
+   * Publish result (100K GEM Solution - supports targeted delivery!)
+   * @param {Object} result - Result payload
+   * @param {string} targetAgentId - Optional: If provided, routes to agent's exclusive queue
+   * @param {string} queueName - Fallback queue name for non-targeted results
    */
-  async publishResult(result, queueName = 'agent.results') {
+  async publishResult(result, targetAgentId = null, queueName = 'agent.results') {
     const message = {
       id: uuidv4(),
       type: 'result',
@@ -278,17 +304,22 @@ export class RabbitMQClient extends EventEmitter {
       result
     };
 
+    // If targetAgentId provided, route to their EXCLUSIVE queue
+    const destinationQueue = targetAgentId
+      ? `brainstorm.results.${targetAgentId}`
+      : queueName;
+
     this.channel.sendToQueue(
-      queueName,
+      destinationQueue,
       Buffer.from(JSON.stringify(message)),
       {
-        persistent: true,
+        persistent: !targetAgentId,  // Exclusive queues don't need persistence
         contentType: 'application/json',
         messageId: message.id
       }
     );
 
-    console.log(`📊 Published result: ${message.id}`);
+    console.log(`📊 Published result to ${destinationQueue}: ${message.id}`);
     return message.id;
   }
 

@@ -4,12 +4,14 @@
  */
 
 import { execSync, spawn } from 'child_process';
-import { RabbitMQClient } from '../../scripts/rabbitmq-client.js';
+import { RabbitMQClient } from '../../src/core/rabbitmq-client.js';
 
 const RABBITMQ_CONTAINER_NAME = 'rabbitmq-test-integration';
 const RABBITMQ_PORT = 5672;
 const RABBITMQ_MANAGEMENT_PORT = 15672;
-const RABBITMQ_URL = `amqp://guest:guest@localhost:${RABBITMQ_PORT}`;
+// UPDATED: Use Docker Compose credentials (admin:rabbitmq123)
+// Following REAL test policy - use actual production-like credentials
+const RABBITMQ_URL = process.env.RABBITMQ_URL || `amqp://admin:rabbitmq123@localhost:${RABBITMQ_PORT}`;
 
 export class TestSetup {
   constructor() {
@@ -61,45 +63,23 @@ export class TestSetup {
 
   /**
    * Start RabbitMQ Docker container
+   *
+   * UPDATED: Uses existing Docker Compose services instead of creating new containers!
+   * Following REAL vs MOCK testing policy (Dec 7, 2025)
+   *
+   * Integration tests should use REAL production-like services from Docker Compose,
+   * not create isolated test containers.
    */
   async startRabbitMQ() {
-    console.log('🐰 Starting RabbitMQ container for integration tests...');
+    console.log('🐰 Using existing RabbitMQ service for integration tests...');
+    console.log('   (REAL test policy: no isolated containers, use Docker Compose services)');
 
-    if (!this.isDockerAvailable()) {
-      throw new Error('Docker is not available. Please install Docker to run integration tests.');
-    }
-
-    // Stop and remove existing container if it exists
-    if (this.containerExists()) {
-      console.log('Removing existing RabbitMQ container...');
-      try {
-        execSync(`docker rm -f ${RABBITMQ_CONTAINER_NAME}`, { stdio: 'ignore' });
-      } catch (error) {
-        // Ignore errors
-      }
-    }
-
-    // Start new container
-    console.log('Starting new RabbitMQ container...');
-    try {
-      execSync(
-        `docker run -d --name ${RABBITMQ_CONTAINER_NAME} \
-          -p ${RABBITMQ_PORT}:5672 \
-          -p ${RABBITMQ_MANAGEMENT_PORT}:15672 \
-          -e RABBITMQ_DEFAULT_USER=guest \
-          -e RABBITMQ_DEFAULT_PASS=guest \
-          rabbitmq:3-management-alpine`,
-        { stdio: 'ignore' }
-      );
-
-      this.containerRunning = true;
-      console.log('RabbitMQ container started');
-    } catch (error) {
-      throw new Error(`Failed to start RabbitMQ container: ${error.message}`);
-    }
-
-    // Wait for RabbitMQ to be ready
+    // Just wait for existing RabbitMQ to be ready
+    // No container creation needed!
     await this.waitForRabbitMQ();
+
+    this.containerRunning = false; // Not managing container lifecycle
+    console.log('✅ Connected to existing RabbitMQ service');
   }
 
   /**
@@ -131,22 +111,14 @@ export class TestSetup {
 
   /**
    * Stop RabbitMQ Docker container
+   *
+   * UPDATED: No-op since we're using existing Docker Compose services
+   * Following REAL vs MOCK testing policy (Dec 7, 2025)
    */
   async stopRabbitMQ() {
-    if (!this.containerRunning) {
-      return;
-    }
-
-    console.log('\n🛑 Stopping RabbitMQ container...');
-
-    try {
-      execSync(`docker stop ${RABBITMQ_CONTAINER_NAME}`, { stdio: 'ignore' });
-      execSync(`docker rm ${RABBITMQ_CONTAINER_NAME}`, { stdio: 'ignore' });
-      this.containerRunning = false;
-      console.log('RabbitMQ container stopped and removed');
-    } catch (error) {
-      console.error('Error stopping RabbitMQ container:', error.message);
-    }
+    // No-op: We don't manage the container lifecycle
+    // Docker Compose services stay running for other tests
+    console.log('\n✅ Test complete (RabbitMQ service remains running for other tests)');
   }
 
   /**

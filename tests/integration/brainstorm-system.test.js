@@ -9,7 +9,7 @@
  * - Real-time broadcasting via RabbitMQ
  */
 
-import { BrainstormSystem, IdeaCategory } from '../../scripts/brainstorm-system.js';
+import { BrainstormSystem, IdeaCategory } from '../../src/systems/brainstorm/system.js';
 import TestSetup, { waitForCondition, wait, assert, assertEqual } from './setup.js';
 
 class BrainstormSystemTest {

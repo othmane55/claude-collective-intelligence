@@ -80,11 +80,14 @@ class AgentOrchestrator {
     // Result queue
     await this.client.setupResultQueue();
 
+    // Brainstorm result queue (separate from task results to avoid race condition)
+    await this.client.setupBrainstormResultQueue();
+
     // Status exchange
     await this.client.setupStatusExchange();
 
-    // Now publish connected status (exchanges are ready)
-    await this.publishStatus({ event: 'connected', agentType: this.agentType }, 'agent.status.connected');
+    // Note: Connected status will be published after agent role setup completes
+    // This ensures listeners are ready before status is broadcast
 
     console.log('✅ All queues and exchanges ready\n');
   }
@@ -95,8 +98,14 @@ class AgentOrchestrator {
   async startTeamLeader() {
     console.log('👔 Starting as TEAM LEADER...\n');
 
-    // Team leader listens for results and coordinates
+    // Team leader listens for task results and coordinates
     await this.client.consumeResults('agent.results', async (msg) => {
+      await this.handleResult(msg);
+    });
+
+    // 100K GEM FIX: Leaders consume from their OWN exclusive brainstorm result queue
+    // Each agent has exclusive queue: brainstorm.results.{agentId}
+    await this.client.consumeResults(`brainstorm.results.${this.agentId}`, async (msg) => {
       await this.handleResult(msg);
     });
 
@@ -104,6 +113,9 @@ class AgentOrchestrator {
     await this.client.subscribeStatus('agent.status.#', 'agent.status', async (msg) => {
       await this.handleStatusUpdate(msg);
     });
+
+    // Publish connected status AFTER all subscriptions are ready
+    await this.publishStatus({ event: 'connected', state: 'connected', agentType: this.agentType }, 'agent.status.connected');
 
     console.log('👔 Team Leader ready - waiting for results and status updates\n');
   }
@@ -124,6 +136,16 @@ class AgentOrchestrator {
       await this.handleBrainstormMessage(msg);
     });
 
+    // 100K GEM FIX: Workers consume from their OWN exclusive brainstorm result queue
+    // With exclusive queues, EVERY agent (Leader/Worker/Collaborator) can initiate
+    // brainstorms and receive responses in their own queue (no round-robin!)
+    await this.client.consumeResults(`brainstorm.results.${this.agentId}`, async (msg) => {
+      await this.handleResult(msg);
+    });
+
+    // Publish connected status AFTER all subscriptions are ready
+    await this.publishStatus({ event: 'connected', state: 'connected', agentType: this.agentType }, 'agent.status.connected');
+
     console.log('⚙️  Worker ready - waiting for tasks\n');
   }
 
@@ -142,6 +164,15 @@ class AgentOrchestrator {
     await this.client.consumeTasks('agent.tasks', async (msg, { ack, nack, reject }) => {
       await this.handleTask(msg, { ack, nack, reject });
     });
+
+    // 100K GEM FIX: Collaborators consume from their OWN exclusive brainstorm result queue
+    // They can also initiate brainstorms, so need to receive responses
+    await this.client.consumeResults(`brainstorm.results.${this.agentId}`, async (msg) => {
+      await this.handleResult(msg);
+    });
+
+    // Publish connected status AFTER all subscriptions are ready
+    await this.publishStatus({ event: 'connected', state: 'connected', agentType: this.agentType }, 'agent.status.connected');
 
     console.log('🤝 Collaborator ready - waiting for brainstorm sessions\n');
   }
@@ -167,6 +198,15 @@ class AgentOrchestrator {
       await this.handleTask(msg, { ack, nack, reject });
     });
 
+    // 100K GEM FIX: Coordinators consume from their OWN exclusive brainstorm result queue
+    // Future-proof: Coordinators might initiate brainstorms for workflow orchestration
+    await this.client.consumeResults(`brainstorm.results.${this.agentId}`, async (msg) => {
+      await this.handleResult(msg);
+    });
+
+    // Publish connected status AFTER all subscriptions are ready
+    await this.publishStatus({ event: 'connected', state: 'connected', agentType: this.agentType }, 'agent.status.connected');
+
     console.log('🎯 Coordinator ready - managing workflows and dependencies\n');
   }
 
@@ -186,6 +226,15 @@ class AgentOrchestrator {
       await this.handleResult(msg);
     });
 
+    // 100K GEM FIX: Monitors consume from their OWN exclusive brainstorm result queue
+    // For consistency and future-proofing across all agent types
+    await this.client.consumeResults(`brainstorm.results.${this.agentId}`, async (msg) => {
+      await this.handleResult(msg);
+    });
+
+    // Publish connected status AFTER all subscriptions are ready
+    await this.publishStatus({ event: 'connected', state: 'connected', agentType: this.agentType }, 'agent.status.connected');
+
     console.log('📊 Monitor ready - tracking system health and performance\n');
   }
 
@@ -195,13 +244,12 @@ class AgentOrchestrator {
   async assignTask(task) {
     console.log(`📋 Assigning task: ${task.title}`);
 
+    // CRITICAL FIX: Preserve ALL task fields (including requiresCollaboration)
+    // Previous implementation only copied specific fields, losing custom properties!
     const taskId = await this.client.publishTask({
-      title: task.title,
-      description: task.description,
-      priority: task.priority || 'normal',
+      ...task,  // Preserve all task fields
       assignedBy: this.agentId,
-      assignedAt: Date.now(),
-      context: task.context || {}
+      assignedAt: Date.now()
     });
 
     await this.publishStatus({
@@ -240,6 +288,9 @@ class AgentOrchestrator {
       // Simulate task processing
       // In real scenario, Claude would execute the actual task
       console.log(`⚙️  Processing task...`);
+
+      // Minimum processing delay to ensure duration > 0
+      await new Promise(resolve => setTimeout(resolve, 10));
 
       // Check if collaboration needed
       if (task.requiresCollaboration) {
@@ -352,13 +403,22 @@ class AgentOrchestrator {
       timestamp: Date.now()
     };
 
-    // Send response back via result queue
-    await this.publishResult({
+    // 100K GEM SOLUTION: Send to initiator's EXCLUSIVE queue (no round-robin!)
+    // Uses msg.from (initiator's agentId) to route to their exclusive queue
+    // publishResult(result, targetAgentId) → brainstorm.results.{targetAgentId}
+    await this.client.publishResult({
       type: 'brainstorm_response',
       ...response
-    });
+    }, msg.from);  // Route to initiator's exclusive queue!
 
-    console.log(`🧠 Brainstorm response sent\n`);
+    // ALSO send to shared agent.results for leader tracking
+    // This allows leaders to monitor all brainstorm activity system-wide
+    await this.client.publishResult({
+      type: 'brainstorm_response',
+      ...response
+    });  // No targetAgentId = goes to shared agent.results queue
+
+    console.log(`🧠 Brainstorm response sent to ${msg.from}'s exclusive queue + agent.results\n`);
   }
 
   /**

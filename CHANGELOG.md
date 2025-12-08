@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CONTRIBUTING.md for contributor guidelines
 - SECURITY.md for security policy
 - CHANGELOG.md for version tracking
+- `docs/lessons/LESSONS_LEARNED.md` - Critical architectural lessons documentation
 
 ### Changed
 - Reorganized 97 markdown files from root to `docs/` subdirectories
@@ -20,6 +21,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Security vulnerability in `jws` package (npm audit fix)
 - LICENSE consistency (Apache 2.0 across all files)
+
+### Identified (Pending Implementation)
+- **Result Queue Architecture Conflict** (December 7, 2025)
+  - Single `agent.results` queue used for dual purposes causes race condition
+  - Workers and Leaders compete for same messages
+  - Proposed Solution: Separate `agent.brainstorm.results` queue
+  - See: `docs/lessons/LESSONS_LEARNED.md` for full analysis
 
 ## [1.0.0] - 2024-12-04
 

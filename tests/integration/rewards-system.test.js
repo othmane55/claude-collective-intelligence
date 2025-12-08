@@ -4,8 +4,8 @@
  * Tests the full rewards system with RabbitMQ integration
  */
 
-import { RabbitMQClient } from '../../scripts/rabbitmq-client.js';
-import { RewardsSystem } from '../../scripts/rewards-system.js';
+import { RabbitMQClient } from '../../src/core/rabbitmq-client.js';
+import { RewardsSystem } from '../../src/systems/rewards/system.js';
 import assert from 'assert';
 
 const TEST_CONFIG = {

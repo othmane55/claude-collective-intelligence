@@ -2,6 +2,31 @@
 
 Complete documentation for the Multi-Agent Orchestration System.
 
+**Last Updated:** December 8, 2025
+**Status:** Production-Ready (25/25 Integration Tests Passing - 100K GEM Achievement!)
+
+---
+
+## 🏆 Recent Achievements (NEW!)
+
+| Document | Description |
+|----------|-------------|
+| [reports/100K_GEM_ACHIEVEMENT.md](reports/100K_GEM_ACHIEVEMENT.md) | **25/25 Integration Tests (100%)** - Production Ready! |
+| [testing/INTEGRATION_TEST_FINAL_RESULTS.md](testing/INTEGRATION_TEST_FINAL_RESULTS.md) | Complete test results (all 5 suites) |
+| [testing/INTEGRATION_TEST_JOURNEY.md](testing/INTEGRATION_TEST_JOURNEY.md) | Journey from 70% to 100% (6 iterations) |
+| [testing/INTEGRATION_TEST_ITERATIONS_SUMMARY.md](testing/INTEGRATION_TEST_ITERATIONS_SUMMARY.md) | Test iterations summary |
+
+---
+
+## 📚 Lessons Learned (NEW!)
+
+| Document | Description |
+|----------|-------------|
+| [lessons/LESSONS_LEARNED.md](lessons/LESSONS_LEARNED.md) | **5 Critical Lessons** from 100K GEM journey |
+| [lessons/UNIT_VS_INTEGRATION_TEST_FINDINGS.md](lessons/UNIT_VS_INTEGRATION_TEST_FINDINGS.md) | Integration tests > Unit tests discovery |
+| [lessons/ESM_MOCKING_CHALLENGES.md](lessons/ESM_MOCKING_CHALLENGES.md) | Jest ESM mocking deep dive |
+| [lessons/TESTING_STRATEGY_EVOLUTION.md](lessons/TESTING_STRATEGY_EVOLUTION.md) | Testing strategy evolution |
+
 ---
 
 ## Getting Started
@@ -19,6 +44,7 @@ Complete documentation for the Multi-Agent Orchestration System.
 | Document | Description |
 |----------|-------------|
 | [architecture/ARCHITECTURE.md](architecture/ARCHITECTURE.md) | System architecture overview |
+| [architecture/ARCHITECTURE_DECISIONS.md](architecture/ARCHITECTURE_DECISIONS.md) | **5 ADRs** (100K GEM solutions documented!) |
 | [architecture/MCP-SERVER-GUIDE.md](architecture/MCP-SERVER-GUIDE.md) | MCP Server & tools documentation |
 | [architecture/BRAINSTORM_SYSTEM.md](architecture/BRAINSTORM_SYSTEM.md) | Brainstorming system design |
 | [architecture/VOTING-INTEGRATION-GUIDE.md](architecture/VOTING-INTEGRATION-GUIDE.md) | Voting system |
@@ -94,7 +120,8 @@ Complete documentation for the Multi-Agent Orchestration System.
 
 | Document | Description |
 |----------|-------------|
-| [development/](development/) | Development guides |
+| [development/DEPENDENCIES.md](development/DEPENDENCIES.md) | **Complete dependency documentation** (20 NPM + 11 Docker services) |
+| [development/](development/) | Other development guides |
 
 ---
 
@@ -110,7 +137,9 @@ Complete documentation for the Multi-Agent Orchestration System.
 
 | Document | Description |
 |----------|-------------|
-| [reports/](reports/) | Analysis reports |
+| [reports/100K_GEM_ACHIEVEMENT.md](reports/100K_GEM_ACHIEVEMENT.md) | **100K GEM Achievement Report** (Production Ready!) |
+| [reports/phase-completion/](reports/phase-completion/) | Phase completion reports (Infrastructure & Testing) |
+| [reports/](reports/) | Other analysis reports |
 
 ---
 

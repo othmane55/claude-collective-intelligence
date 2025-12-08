@@ -231,3 +231,28 @@ Workers can switch to collaboration mode for brainstorming:
 # Receives brainstorms and tasks
 # Prioritizes collaboration over task execution
 ```
+
+---
+
+## Critical Architecture Note
+
+**Result Queue Conflict (December 7, 2025)**
+
+Workers currently do NOT consume from `agent.results` queue to avoid race conditions with team leaders. This is a documented trade-off:
+
+```
+Problem: Single queue, dual purpose
+- agent.results used for task results (Leader needs)
+- agent.results used for brainstorm responses (Worker needs)
+- Competition causes message loss!
+
+Current Trade-off: Workers don't listen to results
+- Task distribution works
+- Brainstorm responses may be lost
+
+Proposed Solution: Separate brainstorm result queue
+- agent.results -> Leader only (task results)
+- agent.brainstorm.results -> Workers (brainstorm responses)
+```
+
+See: `docs/lessons/LESSONS_LEARNED.md` for full analysis and implementation blueprint.

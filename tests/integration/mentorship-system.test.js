@@ -10,8 +10,8 @@
  * - 3-day accelerated training validation
  */
 
-import MentorshipSystem from '../../scripts/mentorship-system.js';
-import RabbitMQClient from '../../scripts/rabbitmq-client.js';
+import MentorshipSystem from '../../src/systems/mentorship/system.js';
+import RabbitMQClient from '../../src/core/rabbitmq-client.js';
 import TestSetup, { waitForCondition, wait, assert, assertEqual } from './setup.js';
 import { TransferType } from '../../scripts/mentorship/knowledge-transfer.js';
 

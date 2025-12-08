@@ -9,7 +9,7 @@
  * - Result aggregation
  */
 
-import AgentOrchestrator from '../../scripts/orchestrator.js';
+import AgentOrchestrator from '../../src/core/orchestrator.js';
 import TestSetup, { waitForCondition, wait, assert, assertEqual } from './setup.js';
 
 class MultiAgentTest {

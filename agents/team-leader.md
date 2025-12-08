@@ -161,3 +161,34 @@ The Team Leader tracks:
 - Result aggregation success rate
 
 Use `/status` command to view real-time metrics.
+
+---
+
+## Critical Architecture Note
+
+**Result Queue Exclusive Consumer (December 7, 2025)**
+
+Team Leaders are the EXCLUSIVE consumers of `agent.results` queue. This is by design:
+
+```
+Queue Architecture:
++-------------------+
+| agent.results     |  <-- Team Leader ONLY
++-------------------+
+        |
+        v
+   Task Results
+   Brainstorm Responses
+
+IMPORTANT: Workers must NOT consume from this queue!
+- Creates race condition with task result collection
+- Leads to lost messages and inconsistent state
+```
+
+**Current Trade-off:**
+- Workers cannot directly receive brainstorm responses
+- Brainstorm responses flow through result queue to Leader
+- Leader may need to relay responses back to workers
+
+**Proposed Solution:** Separate `agent.brainstorm.results` queue
+- See: `docs/lessons/LESSONS_LEARNED.md` for full analysis

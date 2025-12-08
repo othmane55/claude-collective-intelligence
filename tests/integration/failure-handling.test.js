@@ -9,8 +9,8 @@
  * - Dead letter queue
  */
 
-import AgentOrchestrator from '../../scripts/orchestrator.js';
-import { RabbitMQClient } from '../../scripts/rabbitmq-client.js';
+import AgentOrchestrator from '../../src/core/orchestrator.js';
+import { RabbitMQClient } from '../../src/core/rabbitmq-client.js';
 import TestSetup, { waitForCondition, wait, assert, assertEqual } from './setup.js';
 
 class FailureHandlingTest {

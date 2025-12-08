@@ -9,8 +9,8 @@
  * - Audit trail verification
  */
 
-import VotingSystem from '../../scripts/voting-system.js';
-import RabbitMQClient from '../../scripts/rabbitmq-client.js';
+import VotingSystem from '../../src/systems/voting/system.js';
+import RabbitMQClient from '../../src/core/rabbitmq-client.js';
 import TestSetup, { waitForCondition, wait, assert, assertEqual } from './setup.js';
 
 class VotingSystemTest {
