@@ -1,0 +1,5 @@
+# RabbitMQ Multi-Agent System Dependencies
+# Install: pip install -r requirements.txt
+
+pika>=1.3.0
+colorama>=0.4.6

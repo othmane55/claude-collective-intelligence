@@ -1,0 +1,173 @@
+# =============================================================================
+# SYSTEM INSPECTOR WORKFLOW CONFIGURATION
+# =============================================================================
+# Bu dosya tüm pipeline akışını tanımlar.
+# Yeni bir Claude session açıldığında: python orchestrator.py
+# =============================================================================
+
+name: "system-inspector-pipeline"
+version: "5.1.0"
+description: "Mac dual-monitor detection, terminal setup (with Window ID), Claude launcher, RabbitMQ role assignment, safe shutdown pipeline"
+
+# =============================================================================
+# GLOBAL SETTINGS
+# =============================================================================
+settings:
+  verbose: true
+  stop_on_error: false
+  save_report: true
+  report_dir: "./reports"
+
+# =============================================================================
+# TASK PIPELINE - Sıralı çalışır, her task öncekinin çıktısını alır
+# =============================================================================
+tasks:
+  # -------------------------------------------------------------------------
+  # TASK 1: Display Inspector
+  # -------------------------------------------------------------------------
+  - name: "display_inspector"
+    enabled: true
+    description: "Mac ekran yapılandırmasını tespit et"
+    module: "tasks.display_inspector"
+    class: "DisplayInspectorTask"
+    config: {}
+    # Output: displays, external_display, main_display
+
+  # -------------------------------------------------------------------------
+  # TASK 2: Terminal Setup
+  # -------------------------------------------------------------------------
+  - name: "terminal_setup"
+    enabled: true
+    description: "Harici ekrana göre terminal pencereleri aç"
+    module: "tasks.terminal_setup"
+    class: "TerminalSetupTask"
+    depends_on: "display_inspector"  # Önceki task'ın çıktısını bekler
+    config:
+      terminal_count: 3
+      use_dark_theme: true         # Pro (koyu) tema - Claude Code için ideal
+      use_external_display: true
+      terminal_titles:
+        - "LEADER"
+        - "WORKER-1"
+        - "WORKER-2"
+      gap: 0                   # Pencereler bitişik
+
+  # -------------------------------------------------------------------------
+  # TASK 3: Screenshot Validator (Cross-Check System)
+  # -------------------------------------------------------------------------
+  - name: "screenshot_validator"
+    enabled: true
+    description: "İkinci ekran screenshot'ı al ve cross-check yap"
+    module: "tasks.screenshot_validator"
+    class: "ScreenshotValidatorTask"
+    depends_on: "terminal_setup"  # Terminal'ler açıldıktan sonra
+    config:
+      output_dir: "screenshots"
+      max_size_kb: 500           # Max 500KB
+      jpeg_quality: 100          # JPEG kalitesi (%100 - maksimum)
+      resize_factor: 0.5         # Yarı boyut
+      wait_before_capture: 1.5   # Terminal yerleşimi için bekle
+
+  # -------------------------------------------------------------------------
+  # TASK 4: Claude Launcher (Dangerous Mode)
+  # -------------------------------------------------------------------------
+  - name: "claude_launcher"
+    enabled: true
+    description: "3 terminalde Claude Code (dangerous mode) açar"
+    module: "tasks.claude_launcher"
+    class: "ClaudeLauncherTask"
+    depends_on: "screenshot_validator"  # Terminal screenshot'tan sonra
+    config:
+      claude_command: "claude --dangerously-skip-permissions"
+      wait_between_launches: 7     # Her terminal arası 7 saniye bekle
+      wait_after_all: 5            # Tümü açıldıktan sonra 5 saniye bekle
+      screenshot_after: true       # Sonunda verification screenshot al
+      screenshot_dir: "screenshots"
+      jpeg_quality: 100
+      resize_factor: 0.5
+
+  # -------------------------------------------------------------------------
+  # TASK 5: Role Prompter v2.0 (RabbitMQ Rol Atama)
+  # -------------------------------------------------------------------------
+  # Her terminal için ROL-SPESİFİK mesaj gönderir:
+  #   LEADER   → "Sana Takım Lideri görevi vereceğim..."
+  #   WORKER-1 → "Sana Agent görevi vereceğim..."
+  #   WORKER-2 → "Sana Worker görevi vereceğim..."
+  # Window ID ile %100 güvenilir hedefleme!
+  # -------------------------------------------------------------------------
+  - name: "role_prompter"
+    enabled: true
+    description: "Claude'lara RabbitMQ rol ataması yapar (Window ID ile)"
+    module: "tasks.role_prompter"
+    class: "RolePrompterTask"
+    depends_on: "claude_launcher"  # Claude açıldıktan sonra
+    config:
+      # Rol mesajları RolePrompterTask.ROLE_PROMPTS içinde tanımlı
+      wait_before_typing: 5        # Claude hazır olana kadar bekle
+      wait_after_enter: 10         # Enter sonrası cevap bekleme (Claude düşünsün)
+      wait_between_terminals: 7    # Terminaller arası bekleme
+      screenshot_after_each: true  # Her terminal sonrası screenshot
+      screenshot_dir: "screenshots"
+      jpeg_quality: 100
+      resize_factor: 0.5
+
+# -------------------------------------------------------------------------
+  # TASK FINAL: Safe Shutdown (Manuel - Pipeline sonunda)
+  # -------------------------------------------------------------------------
+  # Her terminalde:
+  #   1. /exit komutu gonderir (Claude Code kapatir)
+  #   2. Claude kapandiktan sonra terminali kapatir
+  # Window ID ile %100 guvenilir hedefleme!
+  # NOT: enabled: false - Manuel calistirmak icin: python orchestrator.py --task task_final
+  # -------------------------------------------------------------------------
+  - name: "task_final"
+    enabled: false  # Manuel calistir, otomatik pipeline'da calisma
+    description: "Claude Code ve terminalleri guvenli kapatir"
+    module: "tasks.task_final"
+    class: "TaskFinal"
+    depends_on: "role_prompter"  # Tum gorevler tamamlandiktan sonra
+    config:
+      wait_before_exit: 2        # /exit gondermeden once bekle
+      wait_after_exit: 5         # Claude kapanmasi icin bekle
+      wait_before_close: 2       # Terminal kapatmadan once bekle
+      wait_between_terminals: 3  # Terminaller arasi bekleme
+      close_terminal_after: true # Terminal penceresini de kapat
+
+# =============================================================================
+# FUTURE TASKS (Scalability icin hazir)
+# =============================================================================
+# Yeni task eklemek icin:
+#   - name: "new_task"
+#     enabled: false
+#     module: "tasks.new_task"
+#     class: "NewTask"
+#     depends_on: "previous_task"
+#     config:
+#       custom_setting: value
+
+# =============================================================================
+# HOOKS (İlerisi için)
+# =============================================================================
+hooks:
+  pre_pipeline: null    # Pipeline başlamadan önce çalışır
+  post_pipeline: null   # Pipeline bittikten sonra çalışır
+  on_error: null        # Hata durumunda çalışır
+
+# =============================================================================
+# METADATA
+# =============================================================================
+metadata:
+  author: "System Inspector Team"
+  created: "2025-12-11"
+  updated: "2025-12-11"
+  tags:
+    - "macos"
+    - "display"
+    - "terminal"
+    - "automation"
+    - "screenshot"
+    - "cross-check"
+    - "validation"
+    - "claude-code"
+    - "dangerous-mode"
+    - "multi-agent"
